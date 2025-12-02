@@ -1,0 +1,8 @@
+{
+  "name": "Nexus War: Augmented Conquest",
+  "description": "A location-based AR strategy game combining combat, economy, and logistics in a persistent world.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ]
+}
