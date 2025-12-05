@@ -8,11 +8,11 @@ interface NavBarProps {
 
 const NavBar: React.FC<NavBarProps> = ({ activeTab, setActiveTab }) => {
   const navItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'CMD' },
-    { id: 'map', icon: Map, label: 'TacMap' },
+    { id: 'dashboard', icon: LayoutDashboard, label: 'Painel' },
+    { id: 'map', icon: Map, label: 'Mapa' },
     { id: 'logistics', icon: Truck, label: 'Corp' },
-    { id: 'market', icon: ShoppingBag, label: 'Market' },
-    { id: 'storage', icon: Archive, label: 'Storage' },
+    { id: 'market', icon: ShoppingBag, label: 'Mercado' },
+    { id: 'storage', icon: Archive, label: 'Depósito' },
   ];
 
   return (
@@ -21,7 +21,7 @@ const NavBar: React.FC<NavBarProps> = ({ activeTab, setActiveTab }) => {
         <button
           key={item.id}
           onClick={() => setActiveTab(item.id)}
-          className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
+          className={`flex-1 flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
             activeTab === item.id ? 'text-cyan-400' : 'text-slate-500 hover:text-slate-300'
           }`}
         >

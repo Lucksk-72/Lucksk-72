@@ -5,16 +5,18 @@ import NavBar from './components/NavBar';
 import Logistics from './components/Logistics';
 import Market from './components/Market';
 import Storage from './components/Storage';
+import Tutorial from './components/Tutorial';
 import { MOCK_PLAYER } from './constants';
 import { User, Settings } from 'lucide-react';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard player={MOCK_PLAYER} />;
+        return <Dashboard player={MOCK_PLAYER} onOpenTutorial={() => setShowTutorial(true)} />;
       case 'map':
         return <TacticalMap />;
       case 'logistics':
@@ -24,7 +26,7 @@ const App: React.FC = () => {
       case 'storage':
         return <Storage />;
       default:
-        return <Dashboard player={MOCK_PLAYER} />;
+        return <Dashboard player={MOCK_PLAYER} onOpenTutorial={() => setShowTutorial(true)} />;
     }
   };
 
@@ -38,6 +40,9 @@ const App: React.FC = () => {
 
         {/* Navigation */}
         <NavBar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+        {/* Tutorial Modal */}
+        {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
       </div>
     </div>
   );

@@ -10,11 +10,11 @@ const Logistics: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-white uppercase tracking-wider flex items-center">
           <Truck className="mr-2 text-cyan-400" />
-          Corp. Logistics
+          Logística Corp.
         </h1>
         <div className="text-right">
             <span className="bg-slate-800 text-cyan-400 px-2 py-1 rounded text-xs font-mono font-bold">
-                LVL {MY_COMPANY.level}
+                NVL {MY_COMPANY.level}
             </span>
         </div>
       </div>
@@ -31,7 +31,7 @@ const Logistics: React.FC = () => {
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            {tab === 'company' ? 'My Corp' : tab}
+            {tab === 'company' ? 'Minha Corp' : tab === 'jobs' ? 'Contratos' : 'Frota'}
           </button>
         ))}
       </div>
@@ -49,11 +49,11 @@ const Logistics: React.FC = () => {
                   
                   <div className="grid grid-cols-2 gap-4 mt-4">
                       <div className="bg-slate-900/50 p-3 rounded-xl">
-                          <p className="text-xs text-slate-400 uppercase font-bold">Balance</p>
+                          <p className="text-xs text-slate-400 uppercase font-bold">Saldo</p>
                           <p className="text-emerald-400 font-mono font-bold text-lg">{MY_COMPANY.balance} CR</p>
                       </div>
                       <div className="bg-slate-900/50 p-3 rounded-xl">
-                          <p className="text-xs text-slate-400 uppercase font-bold">Reputation</p>
+                          <p className="text-xs text-slate-400 uppercase font-bold">Reputação</p>
                           <p className="text-amber-400 font-mono font-bold text-lg">{MY_COMPANY.reputation} / 5.0</p>
                       </div>
                   </div>
@@ -62,17 +62,17 @@ const Logistics: React.FC = () => {
               {/* Active Routes */}
               <div>
                   <h3 className="text-sm font-bold text-slate-400 uppercase mb-3 flex items-center">
-                      <Route className="mr-2" size={16}/> Active Routes
+                      <Route className="mr-2" size={16}/> Rotas Ativas
                   </h3>
                   <div className="space-y-2">
                       {MY_COMPANY.routes.map((route, idx) => (
                           <div key={idx} className="bg-slate-800 p-3 rounded-lg border border-slate-700 flex justify-between items-center">
                               <span className="text-white font-mono text-sm">{route}</span>
-                              <span className="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded font-bold">Active</span>
+                              <span className="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded font-bold">Ativa</span>
                           </div>
                       ))}
                       <button className="w-full py-2 border border-dashed border-slate-600 text-slate-400 rounded-lg text-sm hover:border-cyan-500 hover:text-cyan-500 transition-colors">
-                          + Establish New Route
+                          + Estabelecer Nova Rota
                       </button>
                   </div>
               </div>
@@ -80,14 +80,14 @@ const Logistics: React.FC = () => {
               {/* Staff */}
               <div>
                   <h3 className="text-sm font-bold text-slate-400 uppercase mb-3 flex items-center">
-                      <Users className="mr-2" size={16}/> Staffing
+                      <Users className="mr-2" size={16}/> Funcionários
                   </h3>
                   <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
                       <div>
-                          <p className="text-white font-bold">{MY_COMPANY.employees} Employees</p>
-                          <p className="text-xs text-slate-400">8 Drivers, 4 Security</p>
+                          <p className="text-white font-bold">{MY_COMPANY.employees} Colaboradores</p>
+                          <p className="text-xs text-slate-400">8 Motoristas, 4 Segurança</p>
                       </div>
-                      <button className="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded text-xs font-bold text-white">Manage</button>
+                      <button className="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded text-xs font-bold text-white">Gerenciar</button>
                   </div>
               </div>
           </div>
@@ -96,7 +96,7 @@ const Logistics: React.FC = () => {
       {activeTab === 'jobs' && (
         <div className="space-y-4 animate-in fade-in">
           <div className="flex justify-between items-center text-xs text-slate-400 uppercase font-bold tracking-wider mb-2">
-            <span>Marketplace Contracts</span>
+            <span>Mercado de Contratos</span>
           </div>
           
           {TRANSPORT_JOBS.map((job) => (
@@ -106,10 +106,10 @@ const Logistics: React.FC = () => {
                   <span className={`text-[10px] px-2 py-0.5 rounded uppercase font-bold ${
                       job.providerType === 'Player' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'
                   }`}>
-                      {job.providerType === 'Player' ? 'P2P Contract' : 'Corp Contract'}
+                      {job.providerType === 'Player' ? 'Contrato P2P' : 'Contrato Corp'}
                   </span>
                 </div>
-                <span className="text-emerald-400 font-mono font-bold">+{job.reward} Credits</span>
+                <span className="text-emerald-400 font-mono font-bold">+{job.reward} Créditos</span>
               </div>
               
               <div className="flex items-center justify-between mb-4">
@@ -135,7 +135,7 @@ const Logistics: React.FC = () => {
                 </div>
                 <div className="bg-slate-900/50 p-2 rounded flex flex-col items-center justify-center text-center">
                   <ShieldAlert size={14} className={`mb-1 ${job.risk === 'High' ? 'text-red-500' : job.risk === 'Medium' ? 'text-amber-500' : 'text-emerald-500'}`} />
-                  <span className="text-slate-300">{job.risk} Risk</span>
+                  <span className="text-slate-300">Risco {job.risk === 'High' ? 'Alto' : job.risk === 'Medium' ? 'Médio' : 'Baixo'}</span>
                 </div>
                 <div className="bg-slate-900/50 p-2 rounded flex flex-col items-center justify-center text-center">
                   <Clock size={14} className="mb-1 text-slate-400" />
@@ -144,7 +144,7 @@ const Logistics: React.FC = () => {
               </div>
 
               <button className="w-full bg-slate-700 group-hover:bg-cyan-600 text-white font-bold py-2 rounded-lg transition-colors text-sm uppercase tracking-wide">
-                Accept Contract
+                Aceitar Contrato
               </button>
             </div>
           ))}
@@ -155,7 +155,7 @@ const Logistics: React.FC = () => {
         <div className="space-y-4 animate-in fade-in">
           <div className="bg-slate-800/80 p-4 rounded-xl mb-4 border border-slate-700">
               <div className="flex justify-between items-center mb-2">
-                <h3 className="text-white font-bold text-sm">Fleet Status</h3>
+                <h3 className="text-white font-bold text-sm">Status da Frota</h3>
                 <span className="text-cyan-400 text-xs font-bold">2 / 5 Slots</span>
               </div>
               <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
@@ -173,13 +173,13 @@ const Logistics: React.FC = () => {
                 <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${
                   vehicle.status === 'Idle' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400 animate-pulse'
                 }`}>
-                  {vehicle.status}
+                  {vehicle.status === 'Idle' ? 'Ocioso' : 'Em Trânsito'}
                 </div>
               </div>
 
               <div className="mb-3">
                 <div className="flex justify-between text-xs text-slate-500 mb-1">
-                    <span>Hull Integrity</span>
+                    <span>Integridade do Casco</span>
                     <span>{vehicle.integrity}%</span>
                 </div>
                 <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
@@ -189,18 +189,18 @@ const Logistics: React.FC = () => {
 
               <div className="flex items-center text-xs text-slate-300 bg-slate-900 p-2 rounded">
                 <MapPin size={12} className="mr-2 text-slate-500" />
-                Current Loc: {vehicle.location}
+                Local: {vehicle.location}
               </div>
 
               <div className="mt-3 flex space-x-2">
                  <button className="flex-1 bg-slate-700 hover:bg-slate-600 py-1.5 rounded text-xs font-bold text-white">Config</button>
-                 <button className="flex-1 bg-slate-700 hover:bg-slate-600 py-1.5 rounded text-xs font-bold text-white">Maintenance</button>
+                 <button className="flex-1 bg-slate-700 hover:bg-slate-600 py-1.5 rounded text-xs font-bold text-white">Manutenção</button>
               </div>
             </div>
           ))}
           
           <button className="w-full py-4 border-2 border-dashed border-slate-700 rounded-xl text-slate-500 font-bold hover:border-cyan-500 hover:text-cyan-500 transition-colors flex items-center justify-center">
-            <Truck className="mr-2" /> Purchase New Vehicle
+            <Truck className="mr-2" /> Comprar Veículo
           </button>
         </div>
       )}

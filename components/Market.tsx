@@ -8,12 +8,12 @@ const Market: React.FC = () => {
     <div className="p-4 pb-20 h-screen overflow-y-auto">
       <h1 className="text-2xl font-bold text-white uppercase tracking-wider mb-6 flex items-center">
         <ShoppingCart className="mr-2 text-cyan-400" />
-        Global Market
+        Mercado Global
       </h1>
 
       {/* Market Trend Graph */}
       <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 mb-6 backdrop-blur-sm">
-        <h2 className="text-sm font-bold text-slate-400 uppercase mb-4">Index: Rare Materials</h2>
+        <h2 className="text-sm font-bold text-slate-400 uppercase mb-4">Índice: Materiais Raros</h2>
         <div className="h-40 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={CHART_DATA}>
@@ -47,10 +47,10 @@ const Market: React.FC = () => {
                     item.rarity === 'Epic' ? 'border-purple-500 text-purple-500' :
                     item.rarity === 'Rare' ? 'border-blue-400 text-blue-400' : 'border-slate-500 text-slate-400'
                  }`}>
-                    {item.rarity}
+                    {item.rarity === 'Common' ? 'Comum' : item.rarity === 'Rare' ? 'Raro' : item.rarity}
                  </span>
               </div>
-              <p className="text-xs text-slate-400 mt-1">{item.type} • Stock: {item.quantity}</p>
+              <p className="text-xs text-slate-400 mt-1">{item.type} • Estoque: {item.quantity}</p>
             </div>
             
             <div className="flex flex-col items-end">
@@ -64,8 +64,8 @@ const Market: React.FC = () => {
                 }
               </div>
               <div className="flex space-x-1 mt-2">
-                <button className="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1 rounded">Sell</button>
-                <button className="bg-cyan-700 hover:bg-cyan-600 text-white text-xs px-3 py-1 rounded">Buy</button>
+                <button className="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1 rounded">Vender</button>
+                <button className="bg-cyan-700 hover:bg-cyan-600 text-white text-xs px-3 py-1 rounded">Comprar</button>
               </div>
             </div>
           </div>

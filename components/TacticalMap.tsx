@@ -65,12 +65,12 @@ const TacticalMap: React.FC = () => {
         <div>
           <h2 className="text-white font-bold uppercase tracking-wider text-sm flex items-center">
             <Navigation className="inline mr-2 text-cyan-400" size={16} />
-            Tactical Overview
+            Visão Tática
           </h2>
           <p className="text-cyan-500 text-xs">GPS: 40.7128° N, 74.0060° W</p>
         </div>
         <div className="bg-red-500/10 border border-red-500/50 px-2 py-1 rounded text-[10px] text-red-400 animate-pulse font-bold uppercase">
-          Live Feed
+          Ao Vivo
         </div>
       </div>
 
@@ -84,7 +84,7 @@ const TacticalMap: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-white font-bold">{selectedPoint.name}</h3>
-                <p className="text-slate-400 text-xs capitalize">{selectedPoint.type} • {selectedPoint.distance}km away</p>
+                <p className="text-slate-400 text-xs capitalize">{selectedPoint.type} • {selectedPoint.distance}km de distância</p>
               </div>
             </div>
             <button 
@@ -97,21 +97,21 @@ const TacticalMap: React.FC = () => {
           
           <div className="mt-4 flex space-x-2">
             <button className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-2 rounded-lg text-sm font-bold">
-              Set Waypoint
+              Marcar Rota
             </button>
             {selectedPoint.type === 'Resource' && (
               <button className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-lg text-sm font-bold">
-                Deploy Drone
+                Drone
               </button>
             )}
             {selectedPoint.type === 'Enemy' && (
               <button className="flex-1 bg-red-600 hover:bg-red-500 text-white py-2 rounded-lg text-sm font-bold">
-                Attack
+                Atacar
               </button>
             )}
             {selectedPoint.type === 'Market' && (
               <button className="flex-1 bg-amber-600 hover:bg-amber-500 text-white py-2 rounded-lg text-sm font-bold">
-                Trade
+                Negociar
               </button>
             )}
           </div>
