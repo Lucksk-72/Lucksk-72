@@ -7,7 +7,15 @@
 
 <p><strong>Finalidade:</strong> orientar o registro escolar de indicadores relacionados à saúde e acompanhar mudanças individuais ao longo do tempo. Os procedimentos têm finalidade educativa e de acompanhamento, não substituem avaliação clínica, não produzem diagnóstico e não devem ser usados para rotular, constranger ou classificar estudantes.</p>
 
-<p><strong>Sobre o aplicativo EFIeEJA:</strong> o projeto reúne cadastro de turmas e estudantes, seis momentos avaliativos, medidas antropométricas, testes cardiorrespiratórios e histórico. A autenticação pelo Supabase e a estrutura de banco de dados foram preparadas, mas a sincronização completa dos registros ainda não está concluída. A configuração do acesso Google/Google Sala de Aula também depende do cadastro das credenciais OAuth. Até a validação dessas etapas, não inserir dados reais ou identificáveis de estudantes. O link acima abre o projeto e seus arquivos no GitHub.</p>
+<p><strong>Sobre o aplicativo EFIeEJA:</strong> o sistema utiliza autenticação por e-mail, sem acesso pelo Google. O professor cria sua conta, cadastra uma turma e compartilha o link ou código de convite. O estudante acessa o convite, confirma seu e-mail e completa o cadastro. O sistema gera um identificador permanente associado à conta, que é reutilizado quando o estudante muda de turma, preservando a continuidade do histórico. Cadastros, vínculos entre estudantes e turmas e avaliações são armazenados no Supabase. O envio dos links de confirmação para estudantes exige que o projeto tenha um serviço SMTP de e-mail configurado. O link acima abre o aplicativo EFIeEJA.</p>
+<h3>Acesso ao aplicativo</h3>
+<ol>
+<li><strong>Professor:</strong> selecione “Sou professor(a)”, informe seu e-mail e abra o link de confirmação recebido. Depois, cadastre a turma na aba “Turmas”. O aplicativo gera um código e um link exclusivos para aquela turma. Compartilhe um deles com os estudantes.</li>
+<li><strong>Estudante:</strong> abra o link recebido do professor, selecione “Sou estudante”, informe e confirme seu e-mail e complete os dados solicitados. O identificador permanente será exibido na área do estudante.</li>
+<li><strong>Mudança de turma:</strong> o estudante deve utilizar a mesma conta de e-mail já confirmada. Basta acessar o novo link ou informar o novo código; o sistema mantém o identificador original e registra o novo vínculo.</li>
+<li><strong>Histórico:</strong> as avaliações salvas pelo professor são sincronizadas com o banco de dados e podem ser consultadas pelo estudante em sua área individual.</li>
+</ol>
+<p><strong>Privacidade:</strong> os dados de estudantes devem ser tratados conforme as regras da escola e a legislação de proteção de dados. Em especial, dados de saúde exigem cuidado adicional. Não coletar informações além das necessárias, restringir o acesso e observar as exigências de consentimento e proteção aplicáveis a crianças e adolescentes.</p>
 
 <h3>1. Avaliação antropométrica</h3>
 <p>As medidas antropométricas permitem acompanhar mudanças corporais ao longo do tempo. São necessárias balança, fita métrica inelástica e estadiômetro ou instrumento vertical apropriado. Padronizar os procedimentos, preservar a privacidade e registrar os valores brutos. Sempre que possível, utilizar os mesmos equipamentos, pontos anatômicos e condições nas avaliações seguintes.</p>
