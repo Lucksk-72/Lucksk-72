@@ -1,42 +1,25 @@
 # EFIeEJA
 
-Aplicativo para registro e acompanhamento longitudinal de indicadores de saúde e aptidão física de estudantes da Educação Física no Ensino Fundamental e na Educação de Jovens e Adultos.
+Aplicativo para registro e acompanhamento longitudinal de indicadores relacionados à saúde.
 
-## Objetivo
+## Aplicativo
+Abra index.html no navegador para testar a versão 0.1. O repositório pode ser publicado por GitHub Pages após habilitar a publicação da pasta raiz.
 
-Organizar informações das turmas e dos estudantes, registrar medidas e testes de avaliação relacionados à saúde e acompanhar a evolução individual ao longo de seis momentos avaliativos distribuídos por seis semestres (três anos).
+## Aviso sobre dados
+A versão 0.1 é um protótipo local: os dados ficam no armazenamento deste navegador. Não inserir dados reais, identificáveis ou sensíveis de estudantes. Ainda não há autenticação, banco de dados protegido, criptografia de registros ou backup automático. Para uso real, implementar backend, controle de acesso, política de retenção e backup, além de avaliar LGPD e regras da rede de ensino.
 
-## Escopo inicial acordado
+## Funcionalidades
+- Cadastro de turmas e estudantes.
+- Seis momentos avaliativos.
+- Registro de peso, estatura, cintura e quadril.
+- Cálculo automático de IMC, RCQ e relação cintura-estatura.
+- Caminhada de 6 minutos ou corrida/caminhada de 12 minutos.
+- Histórico individual, exportação CSV e backup/restauração JSON.
+- Protocolos resumidos e diferenças em relação ao texto de 2011.
 
-- Cadastro de escolas, turmas e estudantes.
-- Registro de dados iniciais e histórico individual.
-- Seis momentos de avaliação ao longo de três anos.
-- Registro de medidas antropométricas e cálculo automático de indicadores.
-- Duas opções de avaliação cardiorrespiratória: caminhada de 6 minutos e corrida/caminhada de 12 minutos.
-- Relatórios individuais e por turma, com evolução longitudinal.
-- Possibilidade futura de importar estudantes do Google Classroom, mediante autorização e integração apropriada.
+## Arquivos
+- index.html: aplicativo funcional inicial.
+- manual/manual-blogspot.html: manual HTML para Blogger.
+- docs/: bateria, requisitos e decisões pendentes.
 
-## Princípios
-
-1. Priorizar indicadores relacionados à saúde, não classificações de desempenho esportivo.
-2. Utilizar protocolos simples, executáveis pelo professor durante as aulas, com materiais comuns.
-3. Guardar sempre os resultados brutos, além dos indicadores calculados.
-4. Registrar o protocolo e a versão dos critérios usados em cada avaliação.
-5. Não comparar diretamente resultados obtidos em testes cardiorrespiratórios diferentes.
-6. Não tratar classificações de triagem como diagnóstico clínico.
-7. Proteger os dados pessoais dos estudantes, com atenção especial aos menores de idade.
-
-## Situação
-
-Este repositório contém a documentação do projeto e o manual de avaliação em HTML, preparado para publicação no Blogger. O aplicativo ainda não está publicado como sistema funcional; o link do projeto não deve ser confundido com uma versão operacional.
-
-## Estrutura
-
-- `manual/manual-blogspot.html`: manual completo em HTML, pronto para copiar para a aba HTML de uma postagem do Blogger.
-- `docs/bateria-saude.md`: bateria de avaliação acordada.
-- `docs/requisitos-funcionais.md`: funcionalidades previstas.
-- `docs/decisoes-pendentes.md`: pontos que precisam ser definidos antes da implementação.
-
-## Separação de projetos
-
-EFIeEJA é independente do jogo educativo Coleta dos Reinos. Nenhum código ou dado daquele projeto deve ser incorporado aqui sem decisão explícita.
+EFIeEJA é independente do jogo Coleta dos Reinos.
