@@ -27,6 +27,13 @@
 <div id="studentPortal" class="auth-shell" hidden>
   <h2>Área do estudante</h2>
   <p id="studentWelcome"></p>
+  <div id="studentFirstJoin" class="panel" hidden>
+    <h3>Concluir cadastro na turma</h3>
+    <div class="field"><label for="studentFirstCode">Código enviado pelo professor</label><input id="studentFirstCode" autocomplete="off"></div>
+    <div class="field"><label for="studentFirstName">Nome completo</label><input id="studentFirstName" autocomplete="name"></div>
+    <div class="grid2"><div class="field"><label for="studentFirstBirth">Data de nascimento</label><input id="studentFirstBirth" type="date"></div><div class="field"><label for="studentFirstSex">Sexo de referência (opcional)</label><select id="studentFirstSex"><option value="">Não informar</option><option value="F">Feminino</option><option value="M">Masculino</option></select></div></div>
+    <button id="studentJoinFirst" class="primary" type="button">Concluir cadastro</button>
+  </div>
   <div class="panel"><b>Seu identificador permanente</b><p id="studentPermanentId" style="font-size:1.15rem;word-break:break-all"></p><p class="auth-note">Guarde este código. Ele identifica seu histórico no EFIeEJA, mesmo que você mude de turma.</p></div>
   <div class="field"><label for="studentNewJoinCode">Entrar em outra turma com código</label><input id="studentNewJoinCode" autocomplete="off"></div>
   <button id="studentJoinAnother" class="primary" type="button">Vincular à turma</button>
