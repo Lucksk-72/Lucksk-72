@@ -171,6 +171,7 @@
       $("studentWelcome").textContent = "Cadastro vinculado à turma: " + joined.class_name;
       $("studentPermanentId").textContent = joined.student_code;
       $("studentFirstJoin").hidden = true;
+      await loadStudentHistory(joined.student_id);
       $("studentNewJoinCode").value = "";
       return;
     }
@@ -188,6 +189,7 @@
         $("studentWelcome").textContent = "Olá, " + student.display_name + ". Sua conta está ativa.";
         $("studentPermanentId").textContent = student.id;
         $("studentFirstJoin").hidden = true;
+        await loadStudentHistory(student.id);
       } else {
         $("studentWelcome").textContent = "Sua conta está autenticada. Informe o código da turma e seus dados para concluir o cadastro.";
         $("studentPermanentId").textContent = "Será criado ao vincular a primeira turma.";
@@ -255,6 +257,7 @@
       $("studentWelcome").textContent = "Cadastro vinculado à turma: " + joined.class_name;
       $("studentPermanentId").textContent = joined.student_code;
       $("studentFirstJoin").hidden = true;
+      await loadStudentHistory(joined.student_id);
       portalMessage("Cadastro concluído. Seu identificador permanente foi criado.");
     } catch (error) { portalMessage(error.message, true); }
   });
@@ -270,6 +273,7 @@
       $("studentWelcome").textContent = "Você também está vinculado(a) à turma: " + joined.class_name;
       $("studentPermanentId").textContent = joined.student_code;
       $("studentNewJoinCode").value = "";
+      await loadStudentHistory(joined.student_id);
       portalMessage("Vínculo realizado. Seu identificador permaneceu o mesmo.");
     } catch (error) { portalMessage(error.message, true); }
   });
