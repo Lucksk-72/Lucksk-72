@@ -114,12 +114,28 @@
     }
     if (mode === "student" && (pending?.joinCode || inviteFromUrl)) {
       const code = (pending?.joinCode || inviteFromUrl).toUpperCase();
-      const details = pending?.details || { name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Estudante" };
+      const { data: existingStudent, error: existingError } = await client.from("students")
+        .select("id,display_name,birth_date,sex_reference").eq("auth_user_id", session.user.id).maybeSingle();
+      if (existingError) throw existingError;
+      const details = pending?.details?.name ? pending.details : (existingStudent ? {
+        name: existingStudent.display_name, birth: existingStudent.birth_date, sex: existingStudent.sex_reference
+      } : null);
+      finish("student", session.user);
+      if (!details) {
+        $("studentWelcome").textContent = "Seu e-mail foi confirmado. Complete seus dados para criar seu identificador permanente e entrar na turma.";
+        $("studentPermanentId").textContent = "Será criado ao concluir o cadastro.";
+        $("studentFirstJoin").hidden = false;
+        $("studentFirstCode").value = code;
+        $("studentFirstName").value = "";
+        $("studentFirstBirth").value = "";
+        $("studentFirstSex").value = "";
+        return;
+      }
       const joined = await joinClass(code, details);
       localStorage.removeItem(PENDING_KEY);
-      finish("student", session.user);
       $("studentWelcome").textContent = "Cadastro vinculado à turma: " + joined.class_name;
       $("studentPermanentId").textContent = joined.student_code;
+      $("studentFirstJoin").hidden = true;
       $("studentNewJoinCode").value = "";
       return;
     }
@@ -136,9 +152,12 @@
       if (student) {
         $("studentWelcome").textContent = "Olá, " + student.display_name + ". Sua conta está ativa.";
         $("studentPermanentId").textContent = student.id;
+        $("studentFirstJoin").hidden = true;
       } else {
-        $("studentWelcome").textContent = "Sua conta está autenticada. Para concluir, abra o link enviado pelo professor ou informe o código da turma.";
+        $("studentWelcome").textContent = "Sua conta está autenticada. Informe o código da turma e seus dados para concluir o cadastro.";
         $("studentPermanentId").textContent = "Será criado ao vincular a primeira turma.";
+        $("studentFirstJoin").hidden = false;
+        if (inviteFromUrl) $("studentFirstCode").value = inviteFromUrl;
       }
     }
   }
@@ -184,6 +203,25 @@
     } finally {
       $("authSubmit").disabled = false;
     }
+  });
+
+  $("studentJoinFirst").addEventListener("click", async () => {
+    const code = $("studentFirstCode").value.trim().toUpperCase();
+    const details = {
+      name: $("studentFirstName").value.trim(),
+      birth: $("studentFirstBirth").value || null,
+      sex: $("studentFirstSex").value || null
+    };
+    if (!code || !details.name) return portalMessage("Informe o código da turma e seu nome completo.", true);
+    portalMessage("Concluindo cadastro…");
+    try {
+      const joined = await joinClass(code, details);
+      localStorage.removeItem(PENDING_KEY);
+      $("studentWelcome").textContent = "Cadastro vinculado à turma: " + joined.class_name;
+      $("studentPermanentId").textContent = joined.student_code;
+      $("studentFirstJoin").hidden = true;
+      portalMessage("Cadastro concluído. Seu identificador permanente foi criado.");
+    } catch (error) { portalMessage(error.message, true); }
   });
 
   $("studentJoinAnother").addEventListener("click", async () => {
