@@ -28,10 +28,11 @@ Organizar informações das turmas e dos estudantes, registrar medidas e testes 
 
 ## Situação
 
-Este repositório contém a documentação inicial do projeto e as decisões já tomadas. Os protocolos e critérios de referência ainda precisam de validação final antes da implementação do sistema.
+Este repositório contém a documentação do projeto e o manual de avaliação em HTML, preparado para publicação no Blogger. O aplicativo ainda não está publicado como sistema funcional; o link do projeto não deve ser confundido com uma versão operacional.
 
 ## Estrutura
 
+- `manual/manual-blogspot.html`: manual completo em HTML, pronto para copiar para a aba HTML de uma postagem do Blogger.
 - `docs/bateria-saude.md`: bateria de avaliação acordada.
 - `docs/requisitos-funcionais.md`: funcionalidades previstas.
 - `docs/decisoes-pendentes.md`: pontos que precisam ser definidos antes da implementação.
