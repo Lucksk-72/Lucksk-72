@@ -86,6 +86,35 @@
       list.appendChild(item);
     }
   }
+  async function loadStudentHistory(studentId) {
+    const target = $("studentHistoryRows");
+    if (!target) return;
+    target.textContent = "Carregando histórico…";
+    const { data, error } = await client.from("assessments")
+      .select("moment,assessed_on,bmi,waist_hip_ratio,waist_height_ratio,cardiorespiratory_test,distance_m")
+      .eq("student_id", studentId).order("moment", { ascending: true });
+    if (error) { target.textContent = "Não foi possível carregar o histórico: " + error.message; return; }
+    target.replaceChildren();
+    if (!data?.length) { target.textContent = "Nenhuma avaliação registrada até o momento."; return; }
+    const table = document.createElement("table");
+    const head = document.createElement("tr");
+    ["Momento","Data","IMC","RCQ","Cintura/estatura","Teste","Distância (m)"].forEach(label => {
+      const th = document.createElement("th"); th.textContent = label; head.appendChild(th);
+    });
+    table.appendChild(head);
+    for (const row of data) {
+      const tr = document.createElement("tr");
+      [row.moment, row.assessed_on, row.bmi, row.waist_hip_ratio, row.waist_height_ratio,
+       row.cardiorespiratory_test || "—", row.distance_m ?? "—"].forEach(value => {
+        const td = document.createElement("td");
+        td.textContent = value == null ? "—" : (typeof value === "number" ? value.toFixed(2) : String(value));
+        tr.appendChild(td);
+      });
+      table.appendChild(tr);
+    }
+    target.appendChild(table);
+  }
+
   async function joinClass(code, details) {
     const { data, error } = await client.rpc("join_class", {
       p_join_code: code,
