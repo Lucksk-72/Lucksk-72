@@ -109,8 +109,14 @@
     const pending = (() => { try { return JSON.parse(localStorage.getItem(PENDING_KEY) || "null"); } catch { return null; } })();
     const mode = pending?.mode || params.get("mode") || (inviteFromUrl ? "student" : null);
     if (mode === "teacher") {
-      const { error } = await client.rpc("register_as_teacher");
-      if (error) throw error;
+      // Never promote an already-registered student merely because they reopened the app.
+      const { data: alreadyStudent, error: studentCheckError } = await client.from("students")
+        .select("id").eq("auth_user_id", session.user.id).maybeSingle();
+      if (studentCheckError) throw studentCheckError;
+      if (!alreadyStudent) {
+        const { error } = await client.rpc("register_as_teacher");
+        if (error) throw error;
+      }
     }
     if (mode === "student" && (pending?.joinCode || inviteFromUrl)) {
       const code = (pending?.joinCode || inviteFromUrl).toUpperCase();
