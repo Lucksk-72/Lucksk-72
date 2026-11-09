@@ -38,6 +38,9 @@
     if (signedIn) {
       $("sessionEmail").textContent = session.user.email || "Conta autenticada";
       finishReady(session);
+    } else if (!readyResolved) {
+      readyResolved = true;
+      resolveReady(null);
     }
   };
   const classroomResult = message => {
@@ -169,8 +172,9 @@
     if (event === "PASSWORD_RECOVERY") {
       const newPassword = window.prompt("Digite a nova senha (mínimo de 8 caracteres):");
       if (newPassword) {
-        const { error } = await client.auth.updateUser({ password: newPassword });
-        showMessage(error ? error.message : "Senha atualizada. Entre novamente.");
+        client.auth.updateUser({ password: newPassword }).then(({ error }) => {
+          showMessage(error ? error.message : "Senha atualizada. Entre novamente.");
+        });
       }
     }
     if (session?.provider_token && ["SIGNED_IN", "USER_UPDATED", "INITIAL_SESSION"].includes(event)) {
