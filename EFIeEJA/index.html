@@ -5,9 +5,37 @@
 @media(max-width:650px){.grid,.grid2{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}}@media(max-width:430px){.grid,.grid2{grid-template-columns:1fr}.item{align-items:flex-start;flex-direction:column}}
 </style></head><body>
 <header class="head"><b>EFIeEJA</b><small>Avaliação e acompanhamento de indicadores relacionados à saúde</small><div id="sessionBar" class="sessionbar" hidden><span id="sessionEmail"></span><button id="classroomConnect" type="button">Conectar Google Sala de Aula</button><button id="signOut" type="button">Sair</button></div></header>
-<div id="authGate" class="auth-shell" hidden><h2>Acesso ao EFIeEJA</h2><p class="auth-note">Entre com sua conta para acessar o aplicativo. O acesso é individual e os registros locais são separados por conta neste navegador.</p><form id="authForm"><div class="field"><label for="authMode">Ação</label><select id="authMode"><option value="signin">Entrar</option><option value="signup">Criar conta</option></select></div><div class="field"><label for="authEmail">E-mail</label><input id="authEmail" type="email" autocomplete="email" required></div><div class="field"><label for="authPassword">Senha</label><input id="authPassword" type="password" minlength="8" autocomplete="current-password" required></div><div class="auth-actions"><button id="authSubmit" class="primary" type="submit">Entrar</button><button id="forgotPassword" type="button">Recuperar senha</button></div></form><div class="auth-actions"><button id="googleLogin" class="auth-google" type="button">Entrar com Google</button></div><p id="authMessage" class="auth-note" role="status"></p><p class="auth-note">O login Google também solicita as permissões de leitura necessárias para consultar turmas do Google Sala de Aula. O provedor Google precisa estar configurado no Supabase.</p></div>
+<div id="authGate" class="auth-shell">
+  <h2>Acesso ao EFIeEJA</h2>
+  <p class="auth-note">A entrada é feita pelo e-mail. Enviaremos um link de confirmação; não é necessário usar conta Google nem criar senha.</p>
+  <div class="field"><label for="accountRole">Como você vai usar o EFIeEJA?</label><select id="accountRole"><option value="teacher">Sou professor(a)</option><option value="student">Sou estudante</option></select></div>
+  <div id="studentJoinFields" class="hide">
+    <div class="field"><label for="joinCode">Código da turma</label><input id="joinCode" autocomplete="off" placeholder="Código enviado pelo professor"></div>
+    <div class="field"><label for="studentName">Nome completo</label><input id="studentName" autocomplete="name"></div>
+    <div class="grid2">
+      <div class="field"><label for="studentBirth">Data de nascimento</label><input id="studentBirth" type="date"></div>
+      <div class="field"><label for="studentSex">Sexo de referência (opcional)</label><select id="studentSex"><option value="">Não informar</option><option value="F">Feminino</option><option value="M">Masculino</option></select></div>
+    </div>
+  </div>
+  <form id="authForm">
+    <div class="field"><label for="authEmail">E-mail pessoal</label><input id="authEmail" type="email" autocomplete="email" required></div>
+    <button id="authSubmit" class="primary" type="submit">Enviar link de acesso</button>
+  </form>
+  <p id="authMessage" class="auth-note" role="status"></p>
+  <p class="auth-note">O e-mail identifica a conta. O sistema cria um código permanente de estudante, que permanece o mesmo quando você entra em outra turma.</p>
+</div>
+<div id="studentPortal" class="auth-shell" hidden>
+  <h2>Área do estudante</h2>
+  <p id="studentWelcome"></p>
+  <div class="panel"><b>Seu identificador permanente</b><p id="studentPermanentId" style="font-size:1.15rem;word-break:break-all"></p><p class="auth-note">Guarde este código. Ele identifica seu histórico no EFIeEJA, mesmo que você mude de turma.</p></div>
+  <div class="field"><label for="studentNewJoinCode">Entrar em outra turma com código</label><input id="studentNewJoinCode" autocomplete="off"></div>
+  <button id="studentJoinAnother" class="primary" type="button">Vincular à turma</button>
+  <p id="studentPortalMessage" class="auth-note" role="status"></p>
+  <button id="studentSignOut" type="button">Sair</button>
+</div>
 <main class="wrap" id="appRoot" hidden>
-<div class="warning"><b>Importante:</b> a autenticação já está ativa, mas os cadastros e avaliações ainda permanecem no armazenamento local deste navegador. A sincronização completa com o banco Supabase ainda não foi concluída. Não insira dados reais ou identificáveis de estudantes até essa etapa ser implementada e validada.</div><div id="classroomPanel" class="classroom-panel hide"><b>Google Sala de Aula</b><div id="classroomCourses" class="muted">Ainda não conectado.</div></div>
+<div class="panel" id="teacherClassesPanel"><h2>Turmas e convites</h2><p class="muted">Crie as turmas aqui. Compartilhe o link ou o código com os estudantes. O identificador do estudante não muda quando ele entra em outra turma.</p><div id="teacherClassesList" class="list"></div></div>
+<div class="warning"><b>Atenção:</b> as contas, turmas, códigos de convite e identificadores dos estudantes são armazenados no Supabase. Os formulários de avaliação e os resultados ainda estão em armazenamento local deste navegador; portanto, não os considere sincronizados entre dispositivos até a próxima etapa de integração.<div id="classroomPanel" class="classroom-panel hide"><b>Google Sala de Aula</b><div id="classroomCourses" class="muted">Ainda não conectado.</div></div>
 <nav class="nav"><button class="on" data-tab="inicio">Início</button><button data-tab="turmas">Turmas</button><button data-tab="alunos">Estudantes</button><button data-tab="avaliar">Avaliações</button><button data-tab="historico">Histórico/exportação</button><button data-tab="protocolos">Protocolos</button></nav>
 <section id="inicio" class="tab"><div class="panel"><h2>Painel</h2><p class="muted">Cadastro escolar e acompanhamento ao longo de seis momentos avaliativos (seis semestres).</p><div class="stats"><div class="stat"><b id="nt">0</b><small>Turmas</small></div><div class="stat"><b id="na">0</b><small>Estudantes</small></div><div class="stat"><b id="nv">0</b><small>Avaliações</small></div><div class="stat"><b>6</b><small>Momentos previstos</small></div></div><h3>Fluxo</h3><ol><li>Cadastre as turmas.</li><li>Inclua os estudantes.</li><li>Registre as medidas e o teste cardiorrespiratório em cada momento.</li><li>Consulte o histórico e exporte cópias de segurança.</li></ol></div><div class="panel"><h3>Limites de interpretação</h3><ul><li>IMC, RCQ e cintura/estatura são indicadores de triagem, não diagnósticos.</li><li>Para menores de 20 anos, o IMC exige referência por idade e sexo. Esta versão não classifica adolescentes.</li><li>Resultados da caminhada de 6 minutos e da corrida/caminhada de 12 minutos não são diretamente comparáveis.</li><li>Não há ranking ou classificação de desempenho esportivo.</li></ul></div></section>
 <section id="turmas" class="tab hide"><div class="panel"><h2>Cadastro de turma</h2><form id="ft"><div class="grid"><div class="field"><label>Identificação *</label><input id="tn" required placeholder="Ex.: EJA etapa 3"></div><div class="field"><label>Ano letivo</label><input id="ty" type="number" min="2000" max="2100" placeholder="2026"></div><div class="field"><label>Turno</label><select id="tt"><option value="">Não informado</option><option>Manhã</option><option>Tarde</option><option>Noite</option><option>Integral</option></select></div></div><div class="actions"><button class="primary">Salvar turma</button></div></form></div><div class="panel"><h2>Turmas cadastradas</h2><div id="lt" class="list"></div></div></section>
