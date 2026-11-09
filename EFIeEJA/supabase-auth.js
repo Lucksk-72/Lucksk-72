@@ -159,7 +159,7 @@
     showMessage(error ? error.message : "Se o e-mail estiver cadastrado, você receberá um link de recuperação.");
   });
 
-  client.auth.onAuthStateChange(async (event, session) => {
+  client.auth.onAuthStateChange((event, session) => {
     showSession(session);
     if (event === "SIGNED_OUT") {
       window.EFIEEJA_USER_ID = null;
@@ -174,7 +174,7 @@
       }
     }
     if (session?.provider_token && ["SIGNED_IN", "USER_UPDATED", "INITIAL_SESSION"].includes(event)) {
-      await listClassroomCourses(session);
+      Promise.resolve().then(() => listClassroomCourses(session));
     }
   });
 
