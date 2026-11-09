@@ -1,189 +1,256 @@
 (() => {
   const SUPABASE_URL = "https://elehwtzcvdxsxyjjfvyw.supabase.co";
   const SUPABASE_KEY = "sb_publishable_4A2GbN3nbIGQrOyCZNhB1Q__FzN_W2I";
-  const CLASSROOM_SCOPES = [
-    "https://www.googleapis.com/auth/classroom.courses.readonly",
-    "https://www.googleapis.com/auth/classroom.rosters.readonly"
-  ].join(" ");
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
   window.EFIEEJA_SUPABASE = client;
   let resolveReady;
   window.EFIEEJA_AUTH_READY = new Promise(resolve => { resolveReady = resolve; });
-  let readyResolved = false;
-  let lastSession = null;
-
+  let resolved = false;
+  let currentUser = null;
+  let currentRole = null;
   const $ = id => document.getElementById(id);
-  const showMessage = (message, isError = false) => {
+  const PENDING_KEY = "efieeja_pending_access_v2";
+  const params = new URLSearchParams(window.location.search);
+  const inviteFromUrl = (params.get("join") || "").trim().toUpperCase();
+
+  function message(text, error = false) {
     const el = $("authMessage");
     if (!el) return;
-    el.textContent = message;
-    el.style.color = isError ? "#9a3333" : "#315e4d";
-  };
-  const finishReady = session => {
-    if (!session?.user) return;
-    window.EFIEEJA_USER_ID = session.user.id;
-    if (!readyResolved) {
-      readyResolved = true;
-      resolveReady(session);
+    el.textContent = text;
+    el.style.color = error ? "#9a3333" : "#315e4d";
+  }
+  function portalMessage(text, error = false) {
+    const el = $("studentPortalMessage");
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = error ? "#9a3333" : "#315e4d";
+  }
+  function finish(role, user) {
+    currentRole = role;
+    currentUser = user;
+    window.EFIEEJA_ROLE = role;
+    window.EFIEEJA_USER_ID = user?.id || null;
+    $("authGate").hidden = !!user;
+    $("appRoot").hidden = !(user && role === "teacher");
+    $("studentPortal").hidden = !(user && role === "student");
+    $("sessionBar").hidden = !(user && role === "teacher");
+    if (user && role === "teacher") $("sessionEmail").textContent = user.email || "Professor(a)";
+    if (!resolved) {
+      resolved = true;
+      resolveReady({ user, role });
     }
-  };
-  const showSession = session => {
-    lastSession = session;
-    const signedIn = !!session?.user;
-    $("authGate").hidden = signedIn;
-    $("appRoot").hidden = !signedIn;
-    $("sessionBar").hidden = !signedIn;
-    if (signedIn) {
-      $("sessionEmail").textContent = session.user.email || "Conta autenticada";
-      finishReady(session);
-    } else if (!readyResolved) {
-      readyResolved = true;
-      resolveReady(null);
+  }
+  async function loadTeacherClasses() {
+    const { data, error } = await client.from("classes")
+      .select("id,name,school_year,shift,join_code,created_at")
+      .eq("teacher_id", currentUser.id).order("created_at", { ascending: true });
+    if (error) throw error;
+    const list = $("teacherClassesList");
+    list.replaceChildren();
+    if (!data?.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "Nenhuma turma criada ainda. Use o cadastro de turma abaixo.";
+      list.appendChild(empty);
     }
-  };
-  const classroomResult = message => {
-    const panel = $("classroomPanel");
-    const output = $("classroomCourses");
-    panel.classList.remove("hide");
-    output.textContent = message;
-  };
-  const listClassroomCourses = async session => {
-    const token = session?.provider_token;
-    if (!token) {
-      classroomResult("A conta está autenticada, mas não há token do Google Classroom nesta sessão. Clique em “Conectar Google Sala de Aula” para conceder a autorização.");
+    for (const c of (data || [])) {
+      const item = document.createElement("div");
+      item.className = "item";
+      const info = document.createElement("span");
+      const strong = document.createElement("b");
+      strong.textContent = c.name;
+      const small = document.createElement("small");
+      small.textContent = [c.school_year || "", c.shift || "", "Código: " + c.join_code].filter(Boolean).join(" · ");
+      info.append(strong, small);
+      const actions = document.createElement("div");
+      actions.className = "actions";
+      const link = window.location.origin + window.location.pathname + "?join=" + encodeURIComponent(c.join_code);
+      const copy = document.createElement("button");
+      copy.type = "button";
+      copy.textContent = "Copiar link do estudante";
+      copy.addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(link); copy.textContent = "Link copiado"; }
+        catch { window.prompt("Copie o link da turma:", link); }
+      });
+      const code = document.createElement("button");
+      code.type = "button";
+      code.textContent = "Copiar código";
+      code.addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(c.join_code); code.textContent = "Código copiado"; }
+        catch { window.prompt("Código da turma:", c.join_code); }
+      });
+      actions.append(copy, code);
+      item.append(info, actions);
+      list.appendChild(item);
+    }
+  }
+  async function joinClass(code, details) {
+    const { data, error } = await client.rpc("join_class", {
+      p_join_code: code,
+      p_display_name: details.name,
+      p_birth_date: details.birth || null,
+      p_sex_reference: details.sex || null
+    });
+    if (error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row?.student_id) throw new Error("A turma foi localizada, mas o cadastro não retornou um identificador.");
+    return row;
+  }
+  async function activateSession(session) {
+    if (!session?.user) {
+      $("authGate").hidden = false;
+      $("appRoot").hidden = true;
+      $("studentPortal").hidden = true;
+      $("sessionBar").hidden = true;
       return;
     }
-    classroomResult("Consultando suas turmas no Google Sala de Aula…");
-    try {
-      const response = await fetch("https://classroom.googleapis.com/v1/courses?courseStates=ACTIVE&pageSize=100", {
-        headers: { Authorization: "Bearer " + token }
-      });
-      const payload = await response.json();
-      if (!response.ok) {
-        classroomResult("O Google recusou a consulta (" + response.status + "): " + (payload.error?.message || "verifique as permissões concedidas."));
-        return;
-      }
-      const courses = payload.courses || [];
-      const out = $("classroomCourses");
-      out.replaceChildren();
-      if (!courses.length) {
-        out.textContent = "Autorização concluída. Nenhuma turma ativa foi retornada para esta conta.";
-      } else {
-        const title = document.createElement("p");
-        title.textContent = "Conexão confirmada. Turmas ativas encontradas: " + courses.length;
-        out.appendChild(title);
-        const list = document.createElement("ul");
-        courses.forEach(course => {
-          const item = document.createElement("li");
-          item.textContent = course.name + (course.section ? " — " + course.section : "");
-          list.appendChild(item);
-        });
-        out.appendChild(list);
-      }
-      const identity = session.user.identities?.find(item => item.provider === "google");
-      const scopes = CLASSROOM_SCOPES.split(" ");
-      const { error: saveError } = await client.from("google_classroom_connections").upsert({
-        teacher_id: session.user.id,
-        google_subject: identity?.identity_data?.sub || identity?.id || null,
-        google_email: session.user.email || null,
-        granted_scopes: scopes,
-        connected_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
-      if (saveError) console.warn("Não foi possível registrar os metadados da conexão Classroom:", saveError.message);
-    } catch (error) {
-      classroomResult("Não foi possível consultar o Google Sala de Aula: " + error.message);
+    const pending = (() => { try { return JSON.parse(localStorage.getItem(PENDING_KEY) || "null"); } catch { return null; } })();
+    const mode = pending?.mode || params.get("mode") || (inviteFromUrl ? "student" : null);
+    if (mode === "teacher") {
+      const { error } = await client.rpc("register_as_teacher");
+      if (error) throw error;
     }
-  };
+    if (mode === "student" && (pending?.joinCode || inviteFromUrl)) {
+      const code = (pending?.joinCode || inviteFromUrl).toUpperCase();
+      const details = pending?.details || { name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Estudante" };
+      const joined = await joinClass(code, details);
+      localStorage.removeItem(PENDING_KEY);
+      finish("student", session.user);
+      $("studentWelcome").textContent = "Cadastro vinculado à turma: " + joined.class_name;
+      $("studentPermanentId").textContent = joined.student_code;
+      $("studentNewJoinCode").value = "";
+      return;
+    }
+    const { data: profile, error: profileError } = await client.from("profiles").select("role,display_name").eq("id", session.user.id).maybeSingle();
+    if (profileError) throw profileError;
+    const role = profile?.role || "student";
+    finish(role, session.user);
+    if (role === "teacher") {
+      await loadTeacherClasses();
+    } else {
+      const { data: student, error } = await client.from("students")
+        .select("id,display_name").eq("auth_user_id", session.user.id).maybeSingle();
+      if (error) throw error;
+      if (student) {
+        $("studentWelcome").textContent = "Olá, " + student.display_name + ". Sua conta está ativa.";
+        $("studentPermanentId").textContent = student.id;
+      } else {
+        $("studentWelcome").textContent = "Sua conta está autenticada. Para concluir, abra o link enviado pelo professor ou informe o código da turma.";
+        $("studentPermanentId").textContent = "Será criado ao vincular a primeira turma.";
+      }
+    }
+  }
 
+  $("accountRole").addEventListener("change", () => {
+    const student = $("accountRole").value === "student";
+    $("studentJoinFields").classList.toggle("hide", !student);
+    if (student && inviteFromUrl) $("joinCode").value = inviteFromUrl;
+    $("authSubmit").textContent = student ? "Receber link para entrar na turma" : "Receber link de acesso do professor";
+  });
+  if (inviteFromUrl) {
+    $("accountRole").value = "student";
+    $("studentJoinFields").classList.remove("hide");
+    $("joinCode").value = inviteFromUrl;
+    $("studentName").required = true;
+  }
   $("authForm").addEventListener("submit", async event => {
     event.preventDefault();
-    const email = $("authEmail").value.trim();
-    const password = $("authPassword").value;
+    const mode = $("accountRole").value;
+    const email = $("authEmail").value.trim().toLowerCase();
+    const code = mode === "student" ? $("joinCode").value.trim().toUpperCase() : "";
+    const details = mode === "student" ? {
+      name: $("studentName").value.trim(),
+      birth: $("studentBirth").value || null,
+      sex: $("studentSex").value || null
+    } : null;
+    if (mode === "student" && (!code || !details.name)) return message("Informe o código da turma e seu nome.", true);
+    localStorage.setItem(PENDING_KEY, JSON.stringify({ mode, joinCode: code, details }));
     $("authSubmit").disabled = true;
-    showMessage("Aguarde…");
+    message("Enviando link de confirmação para seu e-mail…");
     try {
-      if ($("authMode").value === "signup") {
-        const { data, error } = await client.auth.signUp({ email, password });
-        if (error) throw error;
-        if (!data.session) showMessage("Cadastro recebido. Verifique seu e-mail para confirmar a conta e depois entre no EFIeEJA.");
-        else showMessage("Conta criada.");
-      } else {
-        const { error } = await client.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-      }
+      const redirect = new URL(window.location.href);
+      redirect.searchParams.set("mode", mode);
+      if (code) redirect.searchParams.set("join", code);
+      const { error } = await client.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: true, emailRedirectTo: redirect.toString() }
+      });
+      if (error) throw error;
+      message("Enviamos um link para " + email + ". Abra a mensagem no mesmo dispositivo ou navegador para concluir o acesso. O link expira; se não chegar, confira spam e tente novamente após 60 segundos.");
     } catch (error) {
-      showMessage(error.message, true);
+      message(error.message || "Não foi possível enviar o e-mail.", true);
     } finally {
       $("authSubmit").disabled = false;
     }
   });
-  $("authMode").addEventListener("change", () => {
-    $("authSubmit").textContent = $("authMode").value === "signup" ? "Criar conta" : "Entrar";
+
+  $("studentJoinAnother").addEventListener("click", async () => {
+    const code = $("studentNewJoinCode").value.trim().toUpperCase();
+    if (!code) return portalMessage("Informe o código recebido do professor.", true);
+    portalMessage("Vinculando sua conta à turma…");
+    try {
+      const { data: student } = await client.from("students").select("display_name,birth_date,sex_reference").eq("auth_user_id", currentUser.id).maybeSingle();
+      if (!student) throw new Error("Complete primeiro o cadastro pelo link de uma turma.");
+      const joined = await joinClass(code, { name: student.display_name, birth: student.birth_date, sex: student.sex_reference });
+      $("studentWelcome").textContent = "Você também está vinculado(a) à turma: " + joined.class_name;
+      $("studentPermanentId").textContent = joined.student_code;
+      $("studentNewJoinCode").value = "";
+      portalMessage("Vínculo realizado. Seu identificador permaneceu o mesmo.");
+    } catch (error) { portalMessage(error.message, true); }
   });
-  $("googleLogin").addEventListener("click", async () => {
-    showMessage("Redirecionando para o Google…");
-    const { error } = await client.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: window.location.href.split("#")[0],
-        scopes: CLASSROOM_SCOPES,
-        queryParams: { access_type: "offline", prompt: "consent" }
-      }
-    });
-    if (error) showMessage(error.message, true);
-  });
-  $("classroomConnect").addEventListener("click", async () => {
-    showMessage("Solicitando autorização do Google Sala de Aula…");
-    const hasGoogleIdentity = lastSession?.user?.identities?.some(item => item.provider === "google");
-    const options = {
-      redirectTo: window.location.href.split("#")[0],
-      scopes: CLASSROOM_SCOPES,
-      queryParams: { access_type: "offline", prompt: "consent" }
-    };
-    const result = hasGoogleIdentity
-      ? await client.auth.signInWithOAuth({ provider: "google", options })
-      : await client.auth.linkIdentity({ provider: "google", options });
-    if (result.error) showMessage(result.error.message, true);
-  });
-  $("signOut").addEventListener("click", async () => {
-    const { error } = await client.auth.signOut();
-    if (error) showMessage(error.message, true);
-    else window.location.reload();
-  });
-  $("forgotPassword").addEventListener("click", async () => {
-    const email = $("authEmail").value.trim();
-    if (!email) return showMessage("Informe seu e-mail antes de solicitar a recuperação.", true);
-    const { error } = await client.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.href.split("#")[0]
-    });
-    showMessage(error ? error.message : "Se o e-mail estiver cadastrado, você receberá um link de recuperação.");
-  });
+  $("studentSignOut").addEventListener("click", () => client.auth.signOut().then(() => window.location.reload()));
+  $("signOut").addEventListener("click", () => client.auth.signOut().then(() => window.location.reload()));
+
+  // Teacher class creation is handled here so each class gets its server-generated invitation code.
+  document.addEventListener("submit", async event => {
+    if (event.target?.id !== "ft") return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const name = $("tn").value.trim();
+    if (!name) return;
+    const year = $("ty").value ? Number($("ty").value) : null;
+    const shift = $("tt").value || null;
+    const submit = event.target.querySelector('button[type="submit"],button:not([type])');
+    if (submit) submit.disabled = true;
+    try {
+      const { data, error } = await client.rpc("create_class_with_code", {
+        p_id: crypto.randomUUID(), p_name: name, p_school_year: year, p_shift: shift
+      });
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      event.target.reset();
+      await loadTeacherClasses();
+      const invite = window.location.origin + window.location.pathname + "?join=" + encodeURIComponent(row.join_code);
+      alert("Turma criada. Código: " + row.join_code + "\n\nLink para os estudantes:\n" + invite);
+    } catch (error) { alert("Não foi possível criar a turma: " + error.message); }
+    finally { if (submit) submit.disabled = false; }
+  }, true);
+
+  // The teacher adds students through the invitation link, not by creating local-only records.
+  document.addEventListener("submit", event => {
+    if (event.target?.id !== "fa") return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    alert("Para manter o identificador permanente vinculado ao e-mail, o estudante deve se cadastrar pelo link/código da turma.");
+  }, true);
 
   client.auth.onAuthStateChange((event, session) => {
-    showSession(session);
-    if (event === "SIGNED_OUT") {
-      window.EFIEEJA_USER_ID = null;
-      window.location.reload();
-      return;
-    }
-    if (event === "PASSWORD_RECOVERY") {
-      const newPassword = window.prompt("Digite a nova senha (mínimo de 8 caracteres):");
-      if (newPassword) {
-        client.auth.updateUser({ password: newPassword }).then(({ error }) => {
-          showMessage(error ? error.message : "Senha atualizada. Entre novamente.");
-        });
-      }
-    }
-    if (session?.provider_token && ["SIGNED_IN", "USER_UPDATED", "INITIAL_SESSION"].includes(event)) {
-      Promise.resolve().then(() => listClassroomCourses(session));
+    if (event === "SIGNED_OUT") { window.location.reload(); return; }
+    if (session?.user) {
+      setTimeout(() => activateSession(session).catch(error => {
+        finish(null, null);
+        message("Falha ao preparar sua conta: " + error.message, true);
+      }), 0);
     }
   });
-
   client.auth.getSession().then(({ data, error }) => {
-    if (error) showMessage(error.message, true);
-    showSession(data?.session || null);
+    if (error) { message(error.message, true); finish(null, null); return; }
+    if (!data.session) { finish(null, null); return; }
+    activateSession(data.session).catch(error => {
+      finish(null, null);
+      message("Falha ao preparar sua conta: " + error.message, true);
+    });
   });
 })();
