@@ -3,12 +3,30 @@
 Aplicativo para registro e acompanhamento longitudinal de indicadores relacionados à saúde.
 
 ## Aplicativo
-Abra index.html no navegador para testar a versão 0.1. O repositório pode ser publicado por GitHub Pages após habilitar a publicação da pasta raiz.
 
-## Aviso sobre dados
-A versão 0.1 é um protótipo local: os dados ficam no armazenamento deste navegador. Não inserir dados reais, identificáveis ou sensíveis de estudantes. Ainda não há autenticação, banco de dados protegido, criptografia de registros ou backup automático. Para uso real, implementar backend, controle de acesso, política de retenção e backup, além de avaliar LGPD e regras da rede de ensino.
+Abra `index.html` em um servidor HTTP local ou publique a pasta `EFIeEJA` para testar. O aplicativo agora exige autenticação pelo Supabase antes de liberar a interface.
 
-## Funcionalidades
+## Autenticação e segurança
+
+- Supabase Auth com cadastro, login por e-mail/senha, recuperação de senha e encerramento de sessão.
+- Login Google e fluxo de autorização do Google Sala de Aula.
+- A conexão inicial com o Classroom solicita somente leitura de turmas e listas de participantes.
+- O banco Supabase possui tabelas para professores, turmas, estudantes, histórico de matrículas, avaliações e metadados da conexão Classroom.
+- Row Level Security (RLS) restringe cada registro ao professor autenticado.
+- A chave publishable é pública por definição e está no cliente; nenhuma chave `service_role` ou segredo OAuth deve ser colocado no repositório.
+
+### Configuração necessária
+
+Consulte [GOOGLE_CLASSROOM_SETUP.md](./GOOGLE_CLASSROOM_SETUP.md) para configurar o provedor Google no Supabase e no Google Cloud Console. O Client ID e o Client Secret devem ser cadastrados diretamente nos painéis oficiais, nunca no código.
+
+## Estado da integração — importante
+
+A autenticação e a estrutura inicial do banco foram preparadas. O aplicativo ainda mantém os cadastros e avaliações no armazenamento local do navegador, com chave separada por conta autenticada. A sincronização CRUD completa entre a interface e as tabelas Supabase ainda precisa ser implementada e validada. **Não inserir dados reais ou identificáveis de estudantes até a conclusão dessa etapa.**
+
+O acesso ao Google Sala de Aula já solicita consentimento e tenta listar as turmas ativas. A importação de estudantes e o vínculo automático entre turmas do Classroom e turmas EFIeEJA ainda são etapas futuras e dependem da configuração OAuth do Google.
+
+## Funcionalidades do protótipo
+
 - Cadastro de turmas e estudantes.
 - Seis momentos avaliativos.
 - Registro de peso, estatura, cintura e quadril.
@@ -18,8 +36,10 @@ A versão 0.1 é um protótipo local: os dados ficam no armazenamento deste nave
 - Protocolos resumidos e diferenças em relação ao texto de 2011.
 
 ## Arquivos
-- index.html: aplicativo funcional inicial.
-- manual/manual-blogspot.html: manual HTML para Blogger.
-- docs/: bateria, requisitos e decisões pendentes.
+
+- `index.html`: interface do aplicativo.
+- `supabase-auth.js`: autenticação, proteção da interface e autorização inicial do Classroom.
+- `GOOGLE_CLASSROOM_SETUP.md`: instruções para configurar OAuth do Google.
+- `manual/manual-blogspot.html`: manual HTML para Blogger.
 
 EFIeEJA é independente do jogo Coleta dos Reinos.
